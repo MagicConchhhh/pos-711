@@ -9,6 +9,7 @@
 ## Day2 2026/9/12
 
 $$\left( 1 + \frac{x}{n} \right)^n \geqslant 1 + x$$
+PS：仅作为学习markdown写法用处，与本项目无关
 
 ## Day3 2026/9/15
 
@@ -25,6 +26,15 @@ $$\left( 1 + \frac{x}{n} \right)^n \geqslant 1 + x$$
 - **stream** = 流（数据像水流，只能向前流动）
 
 它住在 `<sstream>` 头文件里。
+
+按照我的理解我之前所会用的cin输入string类型会因为空格而可能无法正常的输入下一个字符串并发生如下的错误，所以最好直接用getline读行在用istringstream一个一个拆开
+
+```cpp
+int n;
+cin >> n;            // 输入 "3" 回车 → 读走 3，但 '\n' 留在缓冲里！
+string s;
+getline(cin, s);
+```
 
 #### 和 cin 的类比
 
@@ -125,112 +135,3 @@ while (iss >> word) {            // 逐个拿词
 - [ ] 修复：一行多个条码（用 istringstream 拆词）
 - [ ] 修复：输出格式（`setw` 对齐 + 两位小数）
 - [ ] 思考：条码改用 `string` 存储、循环比较查找（为 1.2 购物车做准备）
-
-## Day4 2026/9/16
-
-✅ 进度：1.1 已修复完成并提交（commit `a2eefaa`）——上面的 TODO 全部完成：条码改为 `string` 存储 + `findItem()` 字符串查找、`istringstream` 拆词支持多条码、`setw` 表格对齐。初版代码已归档到 `archive/project-level1-v1.cpp`。
-
-### 📖 概念笔记：setw 与表格对齐
-
-#### 核心思想
-
-表格对齐 = **让每一行的同一列"占一样宽"**。
-
-`setw(n)` 的工作只有一句话：**本次输出不足 n 个字符，就补空格凑够**（setw = set width 的缩写）。
-
-#### 实验：把填充字符换成 `.`，让补齐肉眼可见
-
-```cpp
-cout << setw(9) << left << "Cola"     << "|"
-     << setw(9) << left << "Lollipop" << "|"
-     << setw(9) << left << "Noodles"  << "|" << endl;
-```
-
-输出：
-
-```
-Cola.....|Lollipop.|Noodles..|
-```
-
-- `Cola`（4 字符）补 5 个 → 9 格
-- `Lollipop`（8）补 1 个 → 9 格
-- `Noodles`（7）补 2 个 → 9 格
-
-**每列都刚好 9 格宽，后面的竖线（下一列）自然对齐。**
-
-#### ⚠️ 最重要的特性：setw 只管"下一个"输出
-
-```cpp
-cout << setw(9) << "Cola" << "Lollipop" << endl;
-// 输出：Cola     Lollipop   ← 只有 Cola 被补齐，Lollipop 没被管
-```
-
-#### 粘性对照表（为什么有的写一遍、有的每行都要写）
-
-| 操纵器 | 作用 | 持续生效？ |
-|---|---|---|
-| `setw(n)` | 下一个输出的最小宽度 | ❌ 只管下一个 |
-| `left` / `right` | 对齐方向（默认右对齐） | ✅ 持续 |
-| `setfill(c)` | 填充字符（默认空格） | ✅ 持续 |
-| `fixed` / `setprecision(n)` | 小数格式 | ✅ 持续 |
-
-→ 这解释了为什么：`setw(9)` 每行都要重新写，而 `fixed << setprecision(2)` 在循环里只写一次却一直生效。
-
-#### printf 对照表（信息学竞赛知识迁移）
-
-| printf 写法 | C++ 流写法 |
-|---|---|
-| `%-9s`（左对齐补到 9） | `setw(9) << left << s` |
-| `%9s`（右对齐补到 9） | `setw(9) << s` |
-| `%.2f`（两位小数） | `fixed << setprecision(2) << d` |
-| `%9.2f`（补位 + 小数） | `setw(9) << fixed << setprecision(2) << d` |
-
-#### 项目中的实际应用
-
-```cpp
-cout << setw(9) << left << objects[i].name          // 名字列：补到 9 格
-     << objects[i].code << " "                       // 条码列
-     << fixed << setprecision(2) << objects[i].price // 价格列：两位小数
-     << endl;
-```
-
-**列宽为什么选 9？** 最长名字 `Lollipop` 是 8 个字符，**列宽 = 最长内容 + 1~2 格间距**。
-
-#### ⚠️ 边界提醒
-
-`setw(9)` 是"**最小**宽度"，不是最大——名字超过 9 字符（比如以后加的 `Watermelon`）会直接溢出、顶歪后面的列，**不会被截断**。
-
-### 📖 补充：istringstream 的三种用法模式
-
-#### 模式 1️⃣ 拆词（项目主循环在用）
-
-```cpp
-istringstream iss(line);
-string word;
-while (iss >> word) { /* 每次循环取一个词，取完自动结束 */ }
-```
-
-#### 模式 2️⃣ 混合解析（命令 + 数字参数，2.x 会用）
-
-```cpp
-istringstream cmd("restock 001 50");
-string op, code;
-int amount;
-cmd >> op >> code >> amount;    // 字符串读进 string，数字直接读成 int
-```
-
-#### 模式 3️⃣ 自定义分隔符（1.3 读 CSV 用）
-
-```cpp
-istringstream csv("001,Cola,3.50");
-string field;
-while (getline(csv, field, ',')) { /* 读到逗号切一刀 */ }
-```
-
-#### 心智模型：盒子 + 游标
-
-`istringstream` = 装着若干词的盒子 + 一个记住"读到哪了"的游标：
-
-- **每写一次 `>>` 只取一个词**（不是"一次性全读出来"！），取完游标前进
-- 取完后再取 → 失败（条件为假）
-- `while (iss >> word)` 的巧妙：`iss >> word` 既取了一个词、又返回"成功了吗"给 while 判断——失败即结束循环
