@@ -78,7 +78,7 @@ void calculate(int idxx)
 
 int main()
 {
-    cout << "欢迎光临启明711" << endl;
+    cout << "Welcome to Qiming 711!" << endl;
     initialization();
     while(true)
     {
