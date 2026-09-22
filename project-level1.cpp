@@ -4,6 +4,7 @@
 #include<iomanip>
 #include<ctime>
 #include<fstream>
+#include<cstdlib>
 using namespace std;
 const int MAX = 100;
 int itemCount = 0;
@@ -27,7 +28,24 @@ struct Node2
 void initialization()
 {
     ifstream fin("day.txt");
-    fin >> day;
+    fin >> day;                                 // ① 先恢复"今天是第几天"
+
+    // ② 再恢复流水号：扫 sales.csv，找出"今天"已有的最大 No.，下一笔接着来
+    int maxNo = 0;
+    ifstream fsales("sales.csv");
+    string line;
+    while(getline(fsales, line))
+    {
+        istringstream iss(line);
+        string dayS, noS;
+        getline(iss, dayS, ',');
+        getline(iss, noS, ',');
+        if(atoi(dayS.c_str()) != day) continue;     // 不是今天的记录，跳过
+        int n = atoi(noS.c_str());
+        if(n > maxNo) maxNo = n;
+    }
+    saleNo = maxNo + 1;                         // 今天还没记录 → maxNo=0 → saleNo=1 ✓
+
     itemCount = 3;
     objects[1].code = "001",objects[1].name = "Cola",objects[1].price = 3.50;
     objects[2].code = "002",objects[2].name = "Lollipop",objects[2].price = 0.50;
@@ -117,9 +135,71 @@ void newday()
     //cout << "New day started. Today's sales records cleared." << endl;
 }
 
+// 打印一笔交易：第一行带 No./Time，续行缩进；金额打在该笔【最后一行】
+void flush_sale(const string& no, const string& time, string items[], int itemCnt, double total)
+{
+    for(int i = 0;i < itemCnt;i++)
+    {
+        if(i == 0)  cout << setw(6) << left << no << setw(10) << left << time;
+        else        cout << setw(16) << "";                     // 续行：缩进 16 格对齐
+        cout << setw(19) << left << items[i];                   // 明细列
+        if(i == itemCnt - 1)                                    // 最后一行 → 跟上金额
+            cout << setw(5) << right << fixed << setprecision(2) << total;
+        cout << endl;
+    }
+}
+
 void print_sales(int ask_day)
 {
-    cout << "Dates: " << ask_day << endl;
+    cout << "Date: " << ask_day << endl;        // 对照样张："Date: 1"（单数，没有 s）
+    cout << setw(6) << left << "No." << setw(10) << left << "Time" << setw(20) << left << "Items" << "Amount" << endl;
+    cout << "-----------------------------------------" << endl;
+
+    // Part 3：读文件 + 过滤 + 按 No. 分组（把每一笔"缓存"起来，等到它结束才打印）
+    string curNo, curTime;              // 当前这笔的 No. 和 Time
+    string curItems[50];                // 当前这笔的明细缓存（最多 50 条）
+    int curCnt = 0;                     // 已缓存几条明细
+    double curTotal = 0;                // 当前这笔的金额合计
+    double daily = 0;                   // 全天合计
+
+    ifstream fin("sales.csv");
+    string line;
+    while(getline(fin, line))                   // 文件不存在时循环直接不进，不崩溃
+    {
+        istringstream iss(line);
+        string dayS, noS, timeS, nameS, qtyS, amtS;
+        getline(iss, dayS, ',');                // 按逗号一列一列拆（模式 3 实战）
+        getline(iss, noS, ',');
+        getline(iss, timeS, ',');
+        getline(iss, nameS, ',');
+        getline(iss, qtyS, ',');
+        getline(iss, amtS, ',');
+        if(atoi(dayS.c_str()) != ask_day) continue;     // 过滤：不是要查的那天就跳过
+
+        if(noS != curNo)                    // No. 变了 → 说明"上一笔"已经结束了
+        {
+            if(curCnt > 0)                  // 第一笔进来时缓存还是空的，不用打印
+            {
+                flush_sale(curNo, curTime, curItems, curCnt, curTotal);
+                daily += curTotal;
+            }
+            curNo = noS;                    // 开始缓存新的一笔
+            curTime = timeS;
+            curCnt = 0;
+            curTotal = 0;
+        }
+        curItems[curCnt] = nameS + " x" + qtyS;         // 明细进缓存
+        curCnt++;
+        curTotal += atof(amtS.c_str());     // 金额累加（atof：字符串→小数）
+    }
+    if(curCnt > 0)                          // ⚠️ 循环结束，最后一笔还没打印！
+    {
+        flush_sale(curNo, curTime, curItems, curCnt, curTotal);
+        daily += curTotal;
+    }
+
+    cout << "-----------------------------------------" << endl;
+    cout << "Daily: " << fixed << setprecision(2) << daily << endl;
      
 
 }
@@ -180,7 +260,7 @@ int main()
                 int x = day;
                 string plus_information;
                 if(iss >> plus_information)
-                    x = plus_information - '0';
+                    x = atoi(plus_information.c_str());   // string 不能减 '0'，atoi 才是"字符串→整数"
                 print_sales(x);
                 continue;
             }
