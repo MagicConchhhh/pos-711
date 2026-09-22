@@ -2,9 +2,13 @@
 #include<string>
 #include<sstream>
 #include<iomanip>
+#include<ctime>
+#include<fstream>
 using namespace std;
 const int MAX = 100;
 int itemCount = 0;
+int day = 1;
+int saleNo = 1;     // 本笔交易的流水号（第一笔 = 1）
 struct Node1
 {
     string code;    // 条码："001"（原来存 int，字符和数字混着算容易出错，直接存字符串比较更稳）
@@ -22,6 +26,8 @@ struct Node2
 
 void initialization()
 {
+    ifstream fin("day.txt");
+    fin >> day;
     itemCount = 3;
     objects[1].code = "001",objects[1].name = "Cola",objects[1].price = 3.50;
     objects[2].code = "002",objects[2].name = "Lollipop",objects[2].price = 0.50;
@@ -29,7 +35,7 @@ void initialization()
 }
 
 // 按条码查找商品，返回数组下标；找不到返回 -1
-int findItem(const string& code) //或许可以用二分查找
+int findItem(const string& code) //或许可以用二分查找,应该用不上
 {
     for(int i = 1;i <= itemCount;i++)
         if(objects[i].code == code) return i;
@@ -63,6 +69,30 @@ void print_checkout()
     cout << setw(18) << left << "Total" << "=" << total << endl;
 }
 
+void save_sale()
+{
+    time_t now = time(nullptr);
+    tm* lt = localtime(&now);
+    char timeStr[16];
+    strftime(timeStr,sizeof(timeStr),"%H:%M:%S", lt);
+
+    ofstream fout("sales.csv", ios::app);
+    if(!fout) 
+    {
+        cout << "ERROR: cannot write file" << endl;
+         return;
+    }
+    fout << fixed << setprecision(2);       // 文件流也是流：7 会写成 7.00
+    for(int i = 1;i <= itemCount;i++)       // 每件买过的商品写一行：day,No,time,name,qty,amount
+    {
+        if(shop_basket[i].quantity <= 0) continue;
+        fout << day << "," << saleNo << "," << timeStr << ","
+             << objects[i].name << "," << shop_basket[i].quantity << ","
+             << shop_basket[i].amount << "\n";
+    }
+    fout.close();
+}
+
 void drop()//shop_basket全改为0
 {
     for(int i = 1;i <= itemCount;i++)
@@ -74,6 +104,24 @@ void calculate(int idxx)
     shop_basket[idxx].quantity += 1;
     shop_basket[idxx].amount += objects[idxx].price;
     shop_basket[idxx].price = objects[idxx].price;
+}
+
+void newday()
+{
+    cout << "New day started. Today's sales records cleared." << endl;
+    day++;
+    saleNo = 1;
+    ofstream fout("day.txt");
+    fout << day;
+    fout.close();
+    //cout << "New day started. Today's sales records cleared." << endl;
+}
+
+void print_sales(int ask_day)
+{
+    cout << "Dates: " << ask_day << endl;
+     
+
 }
 
 int main()
@@ -92,28 +140,51 @@ int main()
         int flag = 0;
         while(iss >> word)                      // 一行可以输入多个条码：001 003
         {
+
             if(word == "prices")
             {
                 print_price();
                 continue;
             }
+
             if(word == "drop")
             {
                 drop();
                 cout << "Cart cleared." << endl;
                 continue;
             }
+
             if(word == "print")
             {
                 print_checkout();
                 continue;
             }
+
             if(word == "checkout")
             {
                 print_checkout();
+                save_sale();
                 drop();                 // 结账后清空购物车
+                saleNo++;
                 continue;
             }
+
+            if(word == "newday")
+            {
+                newday();
+                continue;
+            }
+
+            if(word == "sales")
+            {
+                int x = day;
+                string plus_information;
+                if(iss >> plus_information)
+                    x = plus_information - '0';
+                print_sales(x);
+                continue;
+            }
+
             if(word[0] == '-')
             {
                 int j = findItem(word.substr(1));       // "-001" → 去掉减号查 "001"（和加法分支同款正规查找）
