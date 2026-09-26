@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>七一一便利店 POS 系统 · 项目汇报</title>
+<style>
+  :root{
+    --ink:#16202c; --muted:#64748b; --accent:#2563eb; --accent-soft:#eef4ff;
+    --line:#e2e8f0; --bg:#f8fafc; --ok:#16a34a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;
+    background:var(--bg); color:var(--ink); overflow:hidden;
+  }
+  .slide{
+    position:fixed; inset:0; display:none; flex-direction:column; justify-content:center;
+    padding:6vh 8vw; background:var(--bg);
+  }
+  .slide.active{display:flex}
+  h1{font-size:clamp(30px,4.6vw,54px); line-height:1.25; letter-spacing:.5px}
+  h2{font-size:clamp(22px,2.6vw,34px); margin-bottom:3.5vh}
+  h2 .bar{display:inline-block;width:10px;height:.95em;background:var(--accent);border-radius:3px;margin-right:14px;vertical-align:-2px}
+  p,li{font-size:clamp(15px,1.5vw,20px); line-height:1.9; color:#2d3748}
+  .muted{color:var(--muted)}
+  .accent{color:var(--accent)}
+  ul{list-style:none}
+  li::before{content:"·"; color:var(--accent); font-weight:800; margin-right:10px}
+  .tag{display:inline-block;background:var(--accent-soft);color:var(--accent);
+       border-radius:999px;padding:4px 14px;font-size:clamp(12px,1.1vw,15px);margin:0 8px 8px 0}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;
+        box-shadow:0 1px 3px rgba(15,23,42,.05)}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  table{border-collapse:collapse;width:100%;font-size:clamp(13px,1.35vw,18px)}
+  th,td{border:1px solid var(--line);padding:10px 14px;text-align:left}
+  th{background:var(--accent-soft);font-weight:700}
+  code,pre{font-family:Consolas,"Courier New",monospace}
+  pre{background:#0f172a;color:#d7e3f4;border-radius:12px;padding:16px 20px;
+      font-size:clamp(12px,1.25vw,16px);line-height:1.7;overflow:auto}
+  pre .c{color:#7d92ad}
+  .big{font-size:clamp(34px,4vw,52px);font-weight:800;color:var(--accent)}
+  .cover{background:#0f172a;color:#fff;justify-content:center;align-items:flex-start}
+  .cover h1{color:#fff}
+  .cover .sub{color:#93a6c4;font-size:clamp(15px,1.6vw,21px);margin-top:2.2vh;line-height:1.9}
+  .cover .rule{width:96px;height:6px;background:var(--accent);border-radius:3px;margin:3vh 0}
+  .cover .who{color:#cbd5e1}
+  .done{color:var(--ok);font-weight:700}
+  .todo{color:#d97706;font-weight:700}
+  #pg{position:fixed;right:26px;bottom:18px;color:var(--muted);font-size:14px;letter-spacing:1px}
+  #hint{position:fixed;left:26px;bottom:18px;color:#94a3b8;font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- 1 封面 -->
+<section class="slide cover active">
+  <div class="tag">Dian 团队 2026 秋招 · 大一新生项目</div>
+  <h1>七一一便利店 POS 收银系统</h1>
+  <div class="rule"></div>
+  <div class="sub">从命令行到收银报表 —— Level 1 &amp; 2 实现汇报<br>
+  技术栈：C++17 · 单文件 · 零第三方依赖</div>
+  <div class="sub who">汇报人：Yibo ｜ 仓库：github.com/MagicConchhhh/pos-711</div>
+</section>
+
+<!-- 2 背景 -->
+<section class="slide">
+  <h2><span class="bar"></span>项目背景与要求</h2>
+  <div class="grid g2">
+    <div class="card">
+      <p><b>题目</b><br>为启明学院 7 楼 711 便利店开发一套<b>命令行 POS 系统</b>：扫描计价、购物车、结账、销售统计、商品与库存管理。</p>
+    </div>
+    <div class="card">
+      <p><b>硬性要求</b></p>
+      <ul>
+        <li>仅用 C/C++，终端交互</li>
+        <li>gcc 一键编译</li>
+        <li>良好的 git 提交习惯</li>
+        <li>维护学习文档（过程记录）</li>
+      </ul>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:3vh">考察方式：Level 0 环境 → Level 1 基础功能 → Level 2 进阶功能 → Level 3 自由发挥，逐级递进。</p>
+</section>
+
+<!-- 3 进度总览 -->
+<section class="slide">
+  <h2><span class="bar"></span>完成度总览</h2>
+  <div class="grid g3">
+    <div class="card"><p class="muted">Level 0</p><p class="big">✅</p><p>环境 / Git / Hello World</p></div>
+    <div class="card"><p class="muted">Level 1</p><p class="big">✅</p><p>1.1 查询 ｜ 1.2 结账 ｜ 1.3 销售统计</p></div>
+    <div class="card"><p class="muted">Level 2</p><p class="big">✅</p><p>2.1 管理员 ｜ 2.2 库存管理</p></div>
+  </div>
+  <div class="grid g3" style="margin-top:2.2vh">
+    <div class="card"><p class="muted">代码规模</p><p style="font-size:1.1em"><b>~700 行</b> 单文件 C++</p></div>
+    <div class="card"><p class="muted">提交历史</p><p style="font-size:1.1em"><b>10+ 次</b>分级提交（feat / fix / docs）</p></div>
+    <div class="card"><p class="muted">下一步</p><p style="font-size:1.1em"><span class="todo">Level 3</span> 打折 · 组合销售 · 图形化报表</p></div>
+  </div>
+</section>
+
+<!-- 4 命令总览 -->
+<section class="slide">
+  <h2><span class="bar"></span>系统命令总览</h2>
+  <div class="grid g2">
+    <div class="card">
+      <p><b>收银员模式</b>（提示符 <code>&gt; </code>）</p>
+      <pre><span class="c"># 扫码与购物车</span>
+001 001 002     扫三个条码
+-001            退减一件
+print / drop    看小票 / 清空
+checkout        结账（打印并清空）
+
+<span class="c"># 查询与统计</span>
+prices          商品表（含库存）
+sales / sales 1 营业额报表
+newday          开新的一天</pre>
+    </div>
+    <div class="card">
+      <p><b>管理员模式</b>（提示符 <code>admin&gt; </code>，密码进入）</p>
+      <pre><span class="c"># 商品管理</span>
+setprice 001 4.00    改价
+itemadd 004 Caddy 1.00   上架
+itemdel 003         下架
+
+<span class="c"># 库存管理</span>
+restock 001 50      进货（+=）
+setstock 001 70     盘点（=）
+
+<span class="c"># 其他</span>
+setpwd &lt;新密码&gt;     修改密码
+back                退出管理员</pre>
+    </div>
+  </div>
+</section>
+
+<!-- 5 功能演示 1.2 -->
+<section class="slide">
+  <h2><span class="bar"></span>功能演示 · 购物车与结账（1.2）</h2>
+  <pre>&gt; 001 001 002
+Cola     3.50 x2 =7.00
+Lollipop 0.50 x1 =0.50
+&gt; -001
+Cola     3.50 x1 =3.50
+&gt; checkout
+Receipt
+Item     Pri. Qty Amount
+-----------------------
+Cola     3.50 x1  =3.50
+Lollipop 0.50 x1  =0.50
+-----------------------
+Total             =4.00</pre>
+  <p class="muted" style="margin-top:1.6vh">输出与题目样张逐字一致；结账自动记账、清空购物车并推进流水号。</p>
+</section>
+
+<!-- 6 功能演示 1.3 -->
+<section class="slide">
+  <h2><span class="bar"></span>功能演示 · 销售统计（1.3）</h2>
+  <div class="grid g2">
+    <pre>&gt; sales
+Date: 1
+No.   Time      Items             Amount
+-----------------------------------------
+1     10:15:32  Cola x1
+                Lollipop x1       4.00
+2     11:02:10  Noodles x2        12.00
+-----------------------------------------
+Daily: 16.00</pre>
+    <div>
+      <p><b>持久化的三个难点</b></p>
+      <ul>
+        <li>交易明细多行，金额要打<b>最后一笔的最后一行</b>（前瞻问题 → 缓存一笔解决）</li>
+        <li>重启后"今天是第几天"不能忘 → <code>day.txt</code></li>
+        <li>重启后流水号不能撞号 → 启动时扫描历史取最大值 +1</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 功能演示 2.1 -->
+<section class="slide">
+  <h2><span class="bar"></span>功能演示 · 管理员模式（2.1）</h2>
+  <pre>&gt; admin
+Password: ********
+Admin mode.
+admin&gt; setprice 001 4.00
+Price updated.
+admin&gt; itemadd 004 Caddy 1.00
+Caddy(004) added.
+admin&gt; itemdel 003
+Noodles(003) removed.
+admin&gt; prices
+Item     No. Pri. Stock
+-----------------------
+Cola     001 4.00 70
+Lollipop 002 0.50 80
+Caddy    004 1.00 0
+admin&gt; back
+Bye.</pre>
+</section>
+
+<!-- 8 功能演示 2.2 -->
+<section class="slide">
+  <h2><span class="bar"></span>功能演示 · 库存管理（2.2）</h2>
+  <div class="grid g2">
+    <div class="card">
+      <p><b>两个命令，两种语义</b></p>
+      <ul>
+        <li><code>restock</code>：进货 = 库存 <b>+N</b>（增量）</li>
+        <li><code>setstock</code>：盘点 = 库存 <b>=N</b>（绝对值）</li>
+      </ul>
+      <p style="margin-top:1.5vh"><b>库存联动两处</b></p>
+      <ul>
+        <li><b>扫入时拦截</b>：超过库存当场提示，不让白扫</li>
+        <li><b>结账时扣减</b>：只有真正卖出去的才减库存</li>
+      </ul>
+    </div>
+    <pre>admin&gt; setstock 001 2
+Cola stock: 2
+&gt; 001 001
+Cola     3.50 x2 =7.00
+&gt; 001
+ERROR: only 2 in stock
+&gt; checkout
+...（结账后库存 2 → 0）</pre>
+  </div>
+</section>
+
+<!-- 9 架构：文件体系 -->
+<section class="slide">
+  <h2><span class="bar"></span>工程架构 · 四个数据文件的分工</h2>
+  <table>
+    <tr><th>文件</th><th>存什么</th><th>打开模式</th><th>为什么</th></tr>
+    <tr><td><code>items.csv</code></td><td>当前商品表（含库存）</td><td><b>覆盖写</b></td><td>它是"当前状态"</td></tr>
+    <tr><td><code>sales.csv</code></td><td>历史销售流水</td><td><b>追加写</b> ios::app</td><td>账本只增不改，绝不可覆盖</td></tr>
+    <tr><td><code>day.txt</code></td><td>今天是第几天</td><td>覆盖写</td><td>只关心最新值</td></tr>
+    <tr><td><code>password.txt</code></td><td>管理员密码</td><td>覆盖写</td><td>只关心最新值</td></tr>
+  </table>
+  <p style="margin-top:2.6vh" class="accent"><b>一句话原则：状态类文件用覆盖，流水类文件用追加。</b></p>
+</section>
+
+<!-- 10 设计决策 -->
+<section class="slide">
+  <h2><span class="bar"></span>三个关键设计决策</h2>
+  <div class="grid g3">
+    <div class="card">
+      <p class="accent"><b>① 历史小票是"快照"</b></p>
+      <p>销售记录存<b>成交时的名称与金额</b>，不是商品编号的引用——所以改价、下架都不会篡改历史营业额。（对应题目 2.1 的思考题）</p>
+    </div>
+    <div class="card">
+      <p class="accent"><b>② 删商品时购物车同步平移</b></p>
+      <p>购物车按下标对应商品表；删除商品时两个数组<b>同进退</b>，否则"张冠李戴"，把 A 的数量算到 B 头上。</p>
+    </div>
+    <div class="card">
+      <p class="accent"><b>③ 库存扣减放在结账时</b></p>
+      <p>加购即扣的话，顾客中途放弃就漏扣了；<b>结账统一扣</b> = 只有卖出去的才减库存，一次变更、语义清晰。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11 质量保障 -->
+<section class="slide">
+  <h2><span class="bar"></span>质量保障 · 测试与工程习惯</h2>
+  <div class="grid g2">
+    <div class="card">
+      <p><b>六组测试场景（全过）</b></p>
+      <ul>
+        <li>样张逐字对照（1.1 → 2.2）</li>
+        <li>重启持久化：流水号/天数/商品表/密码</li>
+        <li>边界：库存为 0、删掉正在买的商品、密码输错</li>
+        <li>1.x 全回归，确认新功能没改坏老功能</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p><b>工程习惯</b></p>
+      <ul>
+        <li>git 分级提交：feat / fix / docs 前缀，每次功能一个 commit</li>
+        <li>学习文档持续更新（概念笔记 + 踩坑表）</li>
+        <li>VS Code + gdb 调试：F5 一键编译并调试</li>
+        <li>编译开门参数：<code>-Wall -Wextra</code>（编译器帮忙抓 bug）</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 12 踩坑收获 -->
+<section class="slide">
+  <h2><span class="bar"></span>踩过的坑 = 学到的东西</h2>
+  <div class="grid g2">
+    <div class="card"><p><b>字符 '1' ≠ 数字 1</b><br><span class="muted">'1' 的 ASCII 是 49；string 也不能减 '0'，转数字用 atoi/atof</span></p></div>
+    <div class="card"><p><b>前瞻问题</b><br><span class="muted">金额打在"最后一笔最后一行" → 先缓存一笔，等结束信号再输出</span></p></div>
+    <div class="card"><p><b>下标错位</b><br><span class="muted">按下标耦合的两张表，删除时必须同步平移</span></p></div>
+    <div class="card"><p><b>Permission denied</b><br><span class="muted">程序还在运行 → exe 被占用无法编译；先停止再编译</span></p></div>
+    <div class="card"><p><b>调试到旧 exe</b><br><span class="muted">源码比 exe 新 → 行号全错；现在 F5 会自动先编译</span></p></div>
+    <div class="card"><p><b>编辑器缓冲区覆盖</b><br><span class="muted">旧缓冲区 Ctrl+S 把磁盘新代码盖回去——用 git diff 抓出来</span></p></div>
+  </div>
+</section>
+
+<!-- 13 下一步 -->
+<section class="slide">
+  <h2><span class="bar"></span>下一步计划</h2>
+  <div class="grid g2">
+    <div class="card">
+      <p><b>Level 3 · 自由发挥</b></p>
+      <ul>
+        <li>打折与组合销售（满减 / 套餐价 / 会员价）</li>
+        <li>多日报表与月度汇总</li>
+        <li>终端图形化统计（柱状图/热销榜）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p><b>代码改进 Backlog</b></p>
+      <ul>
+        <li>购物车改按条码索引（消除下标耦合）</li>
+        <li>数组升级 vector，商品数量不再受 MAX 限制</li>
+        <li>密码改存哈希（安全实践）</li>
+        <li>补充自动化测试脚本</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 14 结尾 -->
+<section class="slide cover">
+  <h1 style="font-size:clamp(34px,5vw,60px)">谢谢观看 · 请多指教</h1>
+  <div class="rule"></div>
+  <div class="sub">代码与学习文档均已开源：<br>github.com/MagicConchhhh/pos-711</div>
+</section>
+
+<div id="pg">1 / 14</div>
+<div id="hint">← → / 空格 翻页 ｜ 点击右侧前进</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s,k)=>s.classList.toggle('active', k===i));
+    document.getElementById('pg').textContent = (i+1) + ' / ' + slides.length;
+  }
+  addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); go(i+1); }
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(i-1); }
+  });
+  addEventListener('click', e=>{ go(e.clientX < innerWidth*0.3 ? i-1 : i+1); });
+  go(0);
+</script>
+</body>
+</html>
