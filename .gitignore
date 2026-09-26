@@ -4,3 +4,9 @@
 # 程序运行时生成的数据文件（不进仓库）
 day.txt
 sales.csv
+items.csv
+password.txt
+
+# 构建产物（CMake 生成）
+build/
+tests/scratch/
